@@ -1,15 +1,17 @@
 import { exit } from "process";
-import { App } from "./app";
+import { Analyzer } from "./analyzer";
 import { logger } from "./logger";
 
 const args: string[] = process.argv.slice(2);
 const eslintReportFilePath: string | undefined = args[0];
 
 if (!eslintReportFilePath?.length) {
-  logger.log("\r\n\r\nESLint json report file required as argument.\r\n\r\n");
+  logger.logNewLines(1);
+  logger.log("Error: ESLint json report file required as argument.");
+  logger.logNewLines(2);
   exit(9);
 }
 
-const app = new App(eslintReportFilePath);
+const analyzer = new Analyzer(eslintReportFilePath);
 
-app.print();
+analyzer.printReport();

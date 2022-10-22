@@ -6,19 +6,19 @@ import { logger } from "./logger";
 import { RuleReport } from "./types/rule-report.interface";
 import fs from "fs";
 
-export class App {
-  private readonly reportFile: string | undefined = undefined;
-  private readonly report: ESLintReport | undefined = undefined;
+export class Analyzer {
+  private readonly reportFile: string;
+  private readonly report: ESLintReport;
 
-  constructor(private readonly reportFilePath: string) {
-    this.reportFile = fs.readFileSync(this.reportFilePath, { flag: "r", encoding: "utf8" });
+  constructor(reportFilePath: string) {
+    this.reportFile = fs.readFileSync(reportFilePath, { flag: "r", encoding: "utf8" });
     this.report = JSON.parse(this.reportFile);
   }
 
   private getMessages(): ESLintReportMessage[] {
     return this.report
-      ?.map((reportFile: ESLintReportFile) => reportFile.messages)
-      ?.flat() || [];
+      .map((reportFile: ESLintReportFile) => reportFile.messages)
+      .flat() || [];
   }
 
   private getMessagesByRuleId(ruleId: ESLintReportMessage["ruleId"]): ESLintReportMessage[] {
@@ -49,22 +49,37 @@ export class App {
     };
   }
 
-  private printRuleReport(ruleReport: RuleReport): void {
-    const text: string = `${ruleReport.noOfProblems}\t\t`
-      + `${ruleReport.noOfAutofixableProblems}\t\t`
-      + `${ruleReport.noOfProblems - ruleReport.noOfAutofixableProblems}\t\t`
-      + `${ruleReport.ruleId}`;
+  public printReport(): void {
+    logger.log("Problems:\tAuto:\t\tManually:\tManually acc.\tRule:");
+    logger.logSeperatorLine(100);
 
-    logger.log(text);
-  }
+    let noOfProblemsTotal: number = 0;
+    let noOfAutofixableProblemsTotal: number = 0;
+    let noOfManuallyFixableProblemsTotal: number = 0;
 
-  public print(): void {
-    logger.log("Problems:\tAuto:\t\tManually:\tRule:");
     this.getUniqueRuleIds()
       .map((ruleId: ESLintReportMessage["ruleId"]) => this.getRuleReport(ruleId))
       .sort((a: RuleReport, b: RuleReport) =>
         (a.noOfProblems - a.noOfAutofixableProblems) - (b.noOfProblems - b.noOfAutofixableProblems),
       )
-      .forEach(ruleReport => this.printRuleReport(ruleReport));
+      .forEach(ruleReport => {
+        noOfProblemsTotal += ruleReport.noOfProblems;
+        noOfAutofixableProblemsTotal += ruleReport.noOfAutofixableProblems;
+
+        const noOfManuallyFixableProblems = ruleReport.noOfProblems - ruleReport.noOfAutofixableProblems;
+        noOfManuallyFixableProblemsTotal += noOfManuallyFixableProblems;
+
+        const text = `${ruleReport.noOfProblems}\t\t`
+          + `${ruleReport.noOfAutofixableProblems}\t\t`
+          + `${noOfManuallyFixableProblems}\t\t`
+          + `${noOfManuallyFixableProblemsTotal}\t\t`
+          + `${ruleReport.ruleId}`;
+
+        logger.log(text);
+      });
+
+    logger.logSeperatorLine(100);
+    logger.log(`${noOfProblemsTotal}\t\t${noOfAutofixableProblemsTotal}\t\t${noOfManuallyFixableProblemsTotal}\t\t-\t\tTotal`);
+    logger.logNewLines();
   }
 }
