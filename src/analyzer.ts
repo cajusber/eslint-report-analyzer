@@ -34,7 +34,7 @@ export class Analyzer {
   }
 
   private getUniqueRuleIds(): Array<ESLintReportMessage["ruleId"]> {
-    const ruleIds = this.getMessages().map(
+    const ruleIds: Array<ESLintReportMessage["ruleId"]> = this.getMessages().map(
       (reportMessage: ESLintReportMessage) => reportMessage.ruleId,
     );
 
@@ -66,10 +66,10 @@ export class Analyzer {
         noOfProblemsTotal += ruleReport.noOfProblems;
         noOfAutofixableProblemsTotal += ruleReport.noOfAutofixableProblems;
 
-        const noOfManuallyFixableProblems = ruleReport.noOfProblems - ruleReport.noOfAutofixableProblems;
+        const noOfManuallyFixableProblems: number = ruleReport.noOfProblems - ruleReport.noOfAutofixableProblems;
         noOfManuallyFixableProblemsTotal += noOfManuallyFixableProblems;
 
-        const text = `${ruleReport.noOfProblems}\t\t`
+        const text: string = `${ruleReport.noOfProblems}\t\t`
           + `${ruleReport.noOfAutofixableProblems}\t\t`
           + `${noOfManuallyFixableProblems}\t\t`
           + `${noOfManuallyFixableProblemsTotal}\t\t`

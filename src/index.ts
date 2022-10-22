@@ -12,6 +12,6 @@ if (!eslintReportFilePath?.length) {
   exit(9);
 }
 
-const analyzer = new Analyzer(eslintReportFilePath);
+const analyzer: Analyzer = new Analyzer(eslintReportFilePath);
 
 analyzer.printReport();
